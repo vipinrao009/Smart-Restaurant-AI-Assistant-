@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ========== CUSTOM THEME ========== */
+@theme {
+  --color-bg-primary: #0f1117;
+  --color-bg-secondary: #1a1d27;
+  --color-bg-tertiary: #242836;
+  --color-bg-glass: rgba(26, 29, 39, 0.7);
+  --color-accent-gold: #f5a623;
+  --color-accent-amber: #ff9f1c;
+  --color-accent-warm: #ffbf69;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-glass: rgba(255, 255, 255, 0.12);
+  --color-user-bubble: #f5a623;
+  --color-ai-bubble: #242836;
+}
+
+/* ========== BASE STYLES ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 166, 35, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 166, 35, 0.5);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(245, 166, 35, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(245, 166, 35, 0.3);
+  }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Typing indicator dots */
+.typing-dot {
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Glass effect */
+.glass {
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border-glass);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-accent-gold), var(--color-accent-warm));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
