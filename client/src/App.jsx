@@ -8,13 +8,8 @@ export default function App() {
   const [chatActive, setChatActive] = useState(false);
   const [initialMessage, setInitialMessage] = useState('');
 
-  const handleCategoryClick = (category) => {
-    const msg = `What's today's ${category} menu?`;
-    setInitialMessage(msg);
-    setChatActive(true);
-  };
-
-  const handleStartChat = () => {
+  const handleSendMessage = (message) => {
+    setInitialMessage(message);
     setChatActive(true);
   };
 
@@ -24,7 +19,7 @@ export default function App() {
 
       <main className="flex-1">
         {!chatActive ? (
-          <Hero onCategoryClick={handleCategoryClick} />
+          <Hero onSendMessage={handleSendMessage} />
         ) : (
           <ChatInterface initialMessage={initialMessage} />
         )}

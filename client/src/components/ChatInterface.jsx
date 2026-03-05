@@ -4,9 +4,12 @@ import MessageBubble, { TypingIndicator } from './MessageBubble';
 const API_BASE = '/api';
 
 const quickActions = [
-  { label: '🌅 Breakfast', message: "What's today's breakfast menu?" },
-  { label: '☀️ Lunch', message: "What's today's lunch menu?" },
-  { label: '🌙 Dinner', message: "What's today's dinner menu?" },
+  { label: '🌅 Breakfast Menu', message: "What's today's breakfast menu?" },
+  { label: '☀️ Lunch Menu', message: "What's today's lunch menu?" },
+  { label: '🌙 Dinner Menu', message: "What's today's dinner menu?" },
+  { label: '💰 Prices', message: "How much is the Ribeye Steak?" },
+  { label: '🥗 Vegan Options', message: "Recommend me some vegan dishes" },
+  { label: '📋 Order Food', message: "I'd like to place an order" },
 ];
 
 export default function ChatInterface({ initialMessage }) {
