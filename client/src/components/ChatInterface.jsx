@@ -52,7 +52,10 @@ export default function ChatInterface({ initialMessage }) {
       const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text.trim() }),
+        body: JSON.stringify({ 
+          message: text.trim(),
+          history: messages 
+        }),
       });
 
       const data = await res.json();
