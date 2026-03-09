@@ -6,8 +6,11 @@
  */
 
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { MemorySaver } from "@langchain/langgraph";
 import model from "../config/model.js";
 import tools from "../tools/index.js";
+
+const checkpointer = new MemorySaver();
 
 const SYSTEM_PROMPT =
     "You are Chef AI, a friendly and professional restaurant assistant. " +
@@ -28,6 +31,7 @@ const agent = createReactAgent({
     llm: model,
     tools,
     stateModifier: SYSTEM_PROMPT,
+    checkpointSaver: checkpointer,
 });
 
 export default agent;

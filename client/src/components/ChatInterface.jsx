@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import MessageBubble, { TypingIndicator } from './MessageBubble';
 
 const API_BASE = '/api';
+const SESSION_STORAGE_KEY = 'chef-ai-session-id';
 
 const quickActions = [
   { label: '🌅 Breakfast Menu', message: "What's today's breakfast menu?" },
@@ -16,6 +17,9 @@ export default function ChatInterface({ initialMessage }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(() =>
+    localStorage.getItem(SESSION_STORAGE_KEY) || ''
+  );
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const hasProcessedInitial = useRef(false);
@@ -54,13 +58,17 @@ export default function ChatInterface({ initialMessage }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: text.trim(),
-          history: messages 
+          sessionId,
         }),
       });
 
       const data = await res.json();
 
       if (data.error) throw new Error(data.error);
+      if (data.sessionId && data.sessionId !== sessionId) {
+        setSessionId(data.sessionId);
+        localStorage.setItem(SESSION_STORAGE_KEY, data.sessionId);
+      }
 
       setMessages((prev) => [
         ...prev,
