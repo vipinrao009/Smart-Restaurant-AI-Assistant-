@@ -1,30 +1,25 @@
-/**
- * Tool: getPrice
- * Look up the price of a specific dish
- */
-
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { findDish } from "../data/menu.js";
+import { findDishByName } from "../repositories/menuRepository.js";
 
 const priceTool = new DynamicStructuredTool({
     name: "getPrice",
     description:
-        "Returns the price of a specific dish. " +
-        "Use this when a customer asks how much something costs.",
+        "Returns the price of a specific dish from the database. " +
+        "Use when user asks how much a dish costs.",
     schema: z.object({
-        dishName: z.string().describe("The name of the dish to look up"),
+        dishName: z.string().describe("The dish name to look up"),
     }),
     func: async ({ dishName }) => {
-        const result = findDish(dishName);
+        const item = await findDishByName(dishName);
 
-        if (result) {
-            const { item } = result;
-            return `💰 ${item.name} costs $${item.price.toFixed(2)}. ${item.description}.`;
+        if (!item) {
+            return `I could not find "${dishName}" on the menu.`;
         }
 
-        return `Sorry, I couldn't find "${dishName}" on our menu. Try asking for the full menu to see all options!`;
+        return `${item.name} costs $${item.price.toFixed(2)}. ${item.description}`;
     },
 });
 
 export default priceTool;
+

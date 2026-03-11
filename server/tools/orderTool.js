@@ -1,64 +1,65 @@
-/**
- * Tool: placeOrder
- * Place a food order — validates items, checks availability, calculates total
- */
-
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { findDish } from "../data/menu.js";
-import { createOrder } from "../data/orders.js";
+import { findDishByName } from "../repositories/menuRepository.js";
+import { createOrder } from "../repositories/orderRepository.js";
 
 const orderTool = new DynamicStructuredTool({
-    name: "placeOrder",
+    name: "saveOrder",
     description:
-        "Places a food order for the customer. " +
-        "Validates availability and calculates the total. " +
-        "Use this when a customer wants to order specific dishes.",
+        "Saves a customer order in the database. " +
+        "Validates menu items and starts status as pending.",
     schema: z.object({
-        customerName: z.string().describe("The customer's name"),
-        items: z.array(z.string()).describe("List of dish names to order"),
+        customerName: z.string().describe("Customer full name"),
+        items: z.array(z.string()).describe("List of dish names customer wants"),
+        sessionId: z.string().optional().describe("Optional chat session ID"),
     }),
-    func: async ({ customerName, items }) => {
+    func: async ({ customerName, items, sessionId }) => {
         const orderedItems = [];
-        const unavailable = [];
+        const unavailableItems = [];
         let total = 0;
 
         for (const itemName of items) {
-            const result = findDish(itemName);
-
-            if (!result) {
-                unavailable.push(itemName + " (not on menu)");
+            const menuItem = await findDishByName(itemName);
+            if (!menuItem) {
+                unavailableItems.push(`${itemName} (not on menu)`);
                 continue;
             }
 
-            if (result.item.available) {
-                orderedItems.push({ name: result.item.name, price: result.item.price });
-                total += result.item.price;
-            } else {
-                unavailable.push(result.item.name);
+            if (!menuItem.available) {
+                unavailableItems.push(`${menuItem.name} (sold out)`);
+                continue;
             }
+
+            orderedItems.push({
+                name: menuItem.name,
+                price: menuItem.price,
+                category: menuItem.category,
+            });
+            total += menuItem.price;
         }
 
         if (orderedItems.length === 0) {
-            const reason = unavailable.length > 0
-                ? `These items are unavailable: ${unavailable.join(", ")}`
-                : "No valid items found on the menu.";
-            return `❌ Could not place order. ${reason}`;
+            return `Could not place order. ${unavailableItems.join(", ")}`;
         }
 
-        const order = createOrder({ customerName, items: orderedItems, total });
-
-        let response = `✅ Order #${order.id} placed successfully!\n`;
-        response += `👤 Customer: ${customerName}\n`;
-        response += `📦 Items:\n`;
-        orderedItems.forEach((i) => {
-            response += `  • ${i.name} — $${i.price.toFixed(2)}\n`;
+        const order = await createOrder({
+            customerName,
+            items: orderedItems,
+            total,
+            sessionId,
         });
-        response += `💵 Total: $${order.total.toFixed(2)}\n`;
-        response += `📋 Status: Confirmed`;
 
-        if (unavailable.length > 0) {
-            response += `\n\n⚠️ These items were skipped (unavailable): ${unavailable.join(", ")}`;
+        let response = `Order saved successfully.\n`;
+        response += `Order ID: ${order.orderId}\n`;
+        response += `Status: ${order.status}\n`;
+        response += `Total: $${order.total.toFixed(2)}\n`;
+        response += `Items:\n`;
+        response += orderedItems
+            .map((item) => `- ${item.name} ($${item.price.toFixed(2)})`)
+            .join("\n");
+
+        if (unavailableItems.length > 0) {
+            response += `\nSkipped items: ${unavailableItems.join(", ")}`;
         }
 
         return response;

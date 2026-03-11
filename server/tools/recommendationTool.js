@@ -1,48 +1,36 @@
-/**
- * Tool: getRecommendation
- * Suggest dishes based on dietary preference, category, and budget
- */
-
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { getAllItems } from "../data/menu.js";
+import { searchMenuItems } from "../repositories/menuRepository.js";
 
 const recommendationTool = new DynamicStructuredTool({
     name: "getRecommendation",
     description:
-        "Recommends dishes based on dietary preference (veg, non-veg, or vegan) " +
-        "and optionally a meal category and max budget.",
+        "Recommends dishes by dietary preference, category, and optional budget.",
     schema: z.object({
         preference: z.enum(["veg", "non-veg", "vegan"]).describe("Dietary preference"),
-        category: z.enum(["breakfast", "lunch", "dinner"]).optional().describe("Optional meal category"),
-        maxPrice: z.number().optional().describe("Optional maximum price budget"),
+        category: z.enum(["breakfast", "lunch", "dinner"]).optional(),
+        maxPrice: z.number().optional(),
     }),
     func: async ({ preference, category, maxPrice }) => {
-        let items = getAllItems(category).filter(
-            (i) => i.available && i.dietary.includes(preference)
-        );
-
-        if (maxPrice) {
-            items = items.filter((i) => i.price <= maxPrice);
-        }
+        const items = await searchMenuItems({
+            dietary: preference,
+            category,
+            maxPrice,
+            onlyAvailable: true,
+        });
 
         if (items.length === 0) {
-            return (
-                `No available ${preference} dishes found` +
-                `${category ? ` for ${category}` : ""}` +
-                `${maxPrice ? ` under $${maxPrice}` : ""}. Try a different preference!`
-            );
+            return "No matching recommendations found. Try changing filters.";
         }
 
-        const recs = items
+        return items
             .map(
                 (item) =>
-                    `⭐ ${item.name} ($${item.price.toFixed(2)}) — ${item.description} [${item.category}]`
+                    `- ${item.name} ($${item.price.toFixed(2)}) [${item.category}] - ${item.description}`
             )
             .join("\n");
-
-        return `🍽️ Here are my ${preference} recommendations:\n${recs}`;
     },
 });
 
 export default recommendationTool;
+

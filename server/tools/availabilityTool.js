@@ -1,32 +1,27 @@
-/**
- * Tool: checkAvailability
- * Check whether a specific dish is available today
- */
-
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { findDish } from "../data/menu.js";
+import { findDishByName } from "../repositories/menuRepository.js";
 
 const availabilityTool = new DynamicStructuredTool({
     name: "checkAvailability",
-    description:
-        "Checks whether a specific dish is currently available today. " +
-        "Use this when a customer asks if something is in stock or available.",
+    description: "Checks if a dish is available today.",
     schema: z.object({
-        dishName: z.string().describe("The name of the dish to check"),
+        dishName: z.string().describe("Dish name to check"),
     }),
     func: async ({ dishName }) => {
-        const result = findDish(dishName);
+        const item = await findDishByName(dishName);
 
-        if (result) {
-            const { item } = result;
-            return item.available
-                ? `✅ Yes! ${item.name} is available today. It's $${item.price.toFixed(2)} — ${item.description}.`
-                : `❌ Sorry, ${item.name} is sold out today. Would you like me to recommend something similar?`;
+        if (!item) {
+            return `I could not find "${dishName}" on the menu.`;
         }
 
-        return `I couldn't find "${dishName}" on our menu. Try asking for the full menu!`;
+        if (item.available) {
+            return `Yes, ${item.name} is available today at $${item.price.toFixed(2)}.`;
+        }
+
+        return `Sorry, ${item.name} is currently sold out.`;
     },
 });
 
 export default availabilityTool;
+
