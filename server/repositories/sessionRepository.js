@@ -1,18 +1,16 @@
-import { getCollection } from "../db/mongo.js";
-
-const SESSION_COLLECTION = "sessions";
+import Session from "../models/Session.js";
 
 export async function touchSession(threadId) {
-    const now = new Date().toISOString();
+    const now = new Date();
 
-    await getCollection(SESSION_COLLECTION).updateOne(
+    await Session.findOneAndUpdate(
         { threadId },
         {
             $set: { lastSeenAt: now },
             $setOnInsert: { createdAt: now, threadId },
             $inc: { messageCount: 1 },
         },
-        { upsert: true }
+        { upsert: true, new: true }
     );
 }
 

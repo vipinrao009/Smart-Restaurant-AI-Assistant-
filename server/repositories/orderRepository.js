@@ -1,35 +1,30 @@
 import { randomUUID } from "node:crypto";
-import { getCollection } from "../db/mongo.js";
-
-const ORDER_COLLECTION = "orders";
+import Order from "../models/Order.js";
 
 export const ORDER_STATUSES = ["pending", "preparing", "ready", "delivered"];
 
 export async function createOrder({ customerName, items, total, sessionId }) {
     const orderId = `ORD-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const now = new Date().toISOString();
 
-    const orderDoc = {
+    const orderDoc = new Order({
         orderId,
         customerName,
         items,
         total: Number(total.toFixed(2)),
         status: "pending",
         sessionId: sessionId || null,
-        createdAt: now,
-        updatedAt: now,
-    };
+    });
 
-    await getCollection(ORDER_COLLECTION).insertOne(orderDoc);
-    return orderDoc;
+    await orderDoc.save();
+    return orderDoc.toObject();
 }
 
 export async function getOrderByOrderId(orderId) {
-    return getCollection(ORDER_COLLECTION).findOne({ orderId });
+    return Order.findOne({ orderId }).lean();
 }
 
 export async function listOrders() {
-    return getCollection(ORDER_COLLECTION).find({}).sort({ createdAt: -1 }).toArray();
+    return Order.find({}).sort({ createdAt: -1 }).lean();
 }
 
 export async function updateOrderStatus(orderId, status) {
@@ -37,12 +32,10 @@ export async function updateOrderStatus(orderId, status) {
         throw new Error(`Invalid status: ${status}`);
     }
 
-    const updatedAt = new Date().toISOString();
-    await getCollection(ORDER_COLLECTION).updateOne(
+    return Order.findOneAndUpdate(
         { orderId },
-        { $set: { status, updatedAt } }
-    );
-
-    return getOrderByOrderId(orderId);
+        { $set: { status } },
+        { new: true }
+    ).lean();
 }
 

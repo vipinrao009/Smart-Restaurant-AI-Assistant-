@@ -1,25 +1,22 @@
 import dotenv from "dotenv";
-import { connectToDatabase, getCollection } from "../db/mongo.js";
+import connectToDB from "../db/mongo.js";
+import Menu from "../models/Menu.js";
+import Order from "../models/Order.js";
+import Session from "../models/Session.js";
 import seedMenuItems from "../data/seedMenuItems.js";
 
 dotenv.config();
 
 async function seed() {
-    await connectToDatabase();
+    await connectToDB();
 
-    const menuItems = getCollection("menuItems");
-    const orders = getCollection("orders");
-    const sessions = getCollection("sessions");
+    console.log("Cleaning database...");
+    await Menu.deleteMany({});
+    await Order.deleteMany({});
+    await Session.deleteMany({});
 
-    await menuItems.deleteMany({});
-    await orders.deleteMany({});
-    await sessions.deleteMany({});
-
-    await menuItems.insertMany(seedMenuItems);
-    await menuItems.createIndex({ name: "text", description: "text", cuisine: "text" });
-    await menuItems.createIndex({ category: 1, price: 1 });
-    await orders.createIndex({ orderId: 1 }, { unique: true });
-    await sessions.createIndex({ threadId: 1 }, { unique: true });
+    console.log("Seeding menu items...");
+    await Menu.insertMany(seedMenuItems);
 
     console.log(`Seed complete. Inserted ${seedMenuItems.length} menu items.`);
     process.exit(0);

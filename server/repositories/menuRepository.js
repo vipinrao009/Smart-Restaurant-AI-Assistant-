@@ -1,18 +1,15 @@
-import { getCollection } from "../db/mongo.js";
-
-const MENU_COLLECTION = "menuItems";
+import Menu from "../models/Menu.js";
 
 export async function getMenuByCategory(category) {
-    return getCollection(MENU_COLLECTION)
-        .find({ category })
+    return Menu.find({ category })
         .sort({ price: 1 })
-        .toArray();
+        .lean();
 }
 
 export async function findDishByName(dishName) {
-    return getCollection(MENU_COLLECTION).findOne({
+    return Menu.findOne({
         name: { $regex: dishName, $options: "i" },
-    });
+    }).lean();
 }
 
 export async function searchMenuItems({
@@ -39,6 +36,6 @@ export async function searchMenuItems({
         ];
     }
 
-    return getCollection(MENU_COLLECTION).find(query).sort({ price: 1 }).toArray();
+    return Menu.find(query).sort({ price: 1 }).lean();
 }
 

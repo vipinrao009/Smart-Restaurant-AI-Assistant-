@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import { connectToDatabase } from "./db/mongo.js";
+import connectToDB from "./db/mongo.js";
 
 import chatRoutes from "./routes/chat.js";
 import menuRoutes from "./routes/menu.js";
@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 async function startServer() {
-    await connectToDatabase();
+    await connectToDB();
     app.listen(PORT, () => {
         console.log(`Server started on http://localhost:${PORT}`);
     });
